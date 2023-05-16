@@ -12,10 +12,10 @@ import torch.nn as nn
 import numpy as np
 import pytorch_lightning as pl
 from models.macbert import lr_scheduler
-from models.macbert.evaluate_util import compute_corrector_prf, compute_sentence_level_prf
+from utils.metrics import compute_corrector_prf, compute_sentence_level_prf
 from utils.logger import get_logger
 
-logger = get_logger('macbert', './log/train.log')
+logger = get_logger('macbert', './logs/macbert_train.log')
 
 
 class FocalLoss(nn.Module):

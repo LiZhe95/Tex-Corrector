@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+ # -*- coding: utf-8 -*-
 """
 @Time  :2023/3/24 14:29
 @File  :base_model.py
@@ -12,10 +12,10 @@ import torch.nn as nn
 import numpy as np
 import pytorch_lightning as pl
 from models.bert import lr_scheduler
-from models.bert.evaluate_util import compute_corrector_prf, compute_sentence_level_prf
+from utils.metrics import compute_corrector_prf, compute_sentence_level_prf
 from utils.logger import get_logger
 
-logger = get_logger('bert', './log/train.log')
+logger = get_logger('bert', './logs/train.log')
 
 class FocalLoss(nn.Module):
     """
@@ -160,7 +160,6 @@ class CscTrainingModel(BaseTrainingEngine, ABC):
             self.valid_loss.append(loss.cpu().item())
 
         # return loss.cpu().item(), cor_acc_labels, results
-
 
     def on_validation_epoch_end(self) -> None:
         loss = np.mean(self.valid_loss)

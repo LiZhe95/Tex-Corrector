@@ -51,7 +51,7 @@ def main():
         collator = MacBertDataCollator(tokenizer=tokenizer)
 
     elif args.model_name == 'macbert_kl':
-        model = MacBert4CscKL(args, tokenizer)
+        model = MacBert4CscKL(args, tokenizer, training=True)
         collator = MacBertDataCollator(tokenizer=tokenizer)
         args.model_name = 'macbert'
 

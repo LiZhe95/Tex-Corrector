@@ -12,12 +12,11 @@ import torch.nn as nn
 import numpy as np
 import pytorch_lightning as pl
 from models.macbert import lr_scheduler
-from models.macbert.evaluate_util import compute_corrector_prf, compute_sentence_level_prf
+from utils.metrics import compute_corrector_prf, compute_sentence_level_prf
 from utils.logger import get_logger
 import torch.nn.functional as F
-import copy
 
-logger = get_logger('macbert', './log/train.log')
+logger = get_logger('macbert_kl', './logs/macbert_kl_train.log')
 
 
 class FocalLoss(nn.Module):
@@ -147,7 +146,6 @@ class CscTrainingModel(BaseTrainingEngine, ABC):
         
         loss = self.w * outputs[1] + (1 - self.w -0.3) * outputs[0] + kl_loss * (0.3)
         self.log('train_loss', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True, batch_size=len(ori_text))
-        # print(self.long_trem.__sizeof__())
         return loss
 
     def validation_step(self, batch, batch_idx):

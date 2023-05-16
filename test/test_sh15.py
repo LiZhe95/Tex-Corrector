@@ -6,6 +6,7 @@
 import sys
 sys.path.append('..')
 import unittest
+from loguru import logger
 
 from infer import Inference
 from utils.metrics import compute_corrector_prf
@@ -34,7 +35,7 @@ class TestSh(unittest.TestCase):
                 print(predict)
                 print(predict == tgt)
                 print('*' * 100)
-        compute_corrector_prf(results)
+        detection_f1, correction_f1 = compute_corrector_prf(results, logger)
 
 
 if __name__ == '__main__':

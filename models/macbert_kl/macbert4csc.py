@@ -13,15 +13,17 @@ from transformers import BertForMaskedLM
 from models.macbert_kl.base_model import CscTrainingModel, FocalLoss
 import copy
 
+
 class MacBert4Csc(CscTrainingModel, ABC):
-    def __init__(self, cfg, tokenizer):
+    def __init__(self, cfg, tokenizer, training=False):
         super().__init__(cfg)
         self.cfg = cfg
         self.bert = BertForMaskedLM.from_pretrained(cfg.bert_checkpoint)
         self.detection = nn.Linear(self.bert.config.hidden_size, 1)
         self.sigmoid = nn.Sigmoid()
         self.tokenizer = tokenizer
-        self.bert_long_trem = copy.deepcopy(self.bert)
+        if training:
+            self.bert_long_term = copy.deepcopy(self.bert)
         self.eopch_first = False
         self.now_epoch = 0
 
@@ -44,16 +46,18 @@ class MacBert4Csc(CscTrainingModel, ABC):
         # 检错概率
         prob = self.detection(bert_outputs.hidden_states[-1])
 
-        if self.current_epoch != self.now_epoch:
-            self.bert_long_trem = copy.deepcopy(self.bert)
+        if self.current_epoch != self.now_epoch and text_labels is not None:
+            self.bert_long_term = copy.deepcopy(self.bert)
             self.now_epoch = self.current_epoch
-        bert_outputs_long_trem = self.bert_long_trem(**encoded_text, labels=text_labels, return_dict=True, output_hidden_states=True)
-
 
         if text_labels is None:
             # 检错输出，纠错输出
             outputs = (prob, bert_outputs.logits)
         else:
+            # long term output
+            bert_outputs_long_term = self.bert_long_term(**encoded_text, labels=text_labels, return_dict=True,
+                                                         output_hidden_states=True)
+
             det_loss_fct = FocalLoss(num_labels=None, activation_type='sigmoid')
             # pad部分不计算损失
             active_loss = encoded_text['attention_mask'].view(-1, prob.shape[1]) == 1
@@ -65,5 +69,5 @@ class MacBert4Csc(CscTrainingModel, ABC):
                        bert_outputs.loss,
                        self.sigmoid(prob).squeeze(-1),
                        bert_outputs.logits,
-                       bert_outputs_long_trem.logits.cpu().detach())
+                       bert_outputs_long_term.logits.cpu().detach())
         return outputs
